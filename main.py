@@ -83,13 +83,12 @@ def step6a(nonterm):
     tmp.reverse()
     for i in tmp:
         L2.append(i)
-    print(L2)   # for debugging
+    print(L2)
 
     SOS = 'q'
 
 def step6b():
     print('step 6b')
-
     print ("ERROR: output for the chain is not")
 
 def step6c(nonterm):
@@ -100,17 +99,15 @@ def step6c(nonterm):
         L2.pop()
 
     L2.append(nonterm.symbol)
-    print(L2)   # for debugging
+    print(L2)
 
 def point2():
     if SOS == 'q':
         data_from_L2 = L2[L2.__len__() - 1]
-        # data_from_L2 = L2.pop()  # data_from_L2 is terminal or nonterminal
         if data_from_L2 in TERM:    # if data_from_L2 is terminal
             global cur_pointer
             if data_from_L2 == STR[cur_pointer]:
                 step2()
-                # step2(data_from_L2)
                 if cur_pointer == STR.__len__():
                     if L2:
                         step3a()
@@ -134,7 +131,6 @@ def point2():
                 return
         else:   # if data_from_L2 is nonterminal
             step1()
-            # step1(data_from_L2)
             point2()
             return
 
@@ -146,8 +142,6 @@ def point2():
             return
         else:
             if data_from_L1.cur_alt < data_from_L1.count_alt:
-                # if RULES[data_from_L1.symbol][data_from_L1.cur_alt] == L2[L2.__len__() - 1]:    # for pop element in L1
-                #     L2.pop()
                 step6a(data_from_L1)
                 point2()
                 return
