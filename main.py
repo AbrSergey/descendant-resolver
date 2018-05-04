@@ -153,7 +153,6 @@ def point2():
                     step6c(data_from_L1)
                     point2()
                     return
-        pass
 
     if SOS == 't':
         # print string of parse from L1
