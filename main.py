@@ -1,10 +1,3 @@
-# define class of neterminal
-class infNet:
-    def __init__(self, nonterm, count_alt, first_pos):  # nonterminal, count alternatives, position in list
-        self.n = nonterm
-        self.c = count_alt
-        self.f = first_pos
-
 # define class of stack L1
 class elemL1:
     def __init__(self, flag, symbol, cur_alt = 0, count_alt = 0):  # flag terminal/nonterminal, symbol,
@@ -15,15 +8,10 @@ class elemL1:
         self.cur_alt = cur_alt
         self.count_alt = count_alt
 
-# define class of stack L2
-# class elemL2:
-#     def __init__(self, flag, symbol):
-#         self.flag = flag
-#         self.symbol = symbol
+def step1():
+    print('step 1')
 
-def step1(nonterm):
-    print('step1')
-
+    nonterm = L2.pop()
     alt = 0
     tmp = RULES[nonterm][alt]
     L1.append(elemL1(0, nonterm, alt, NUMBER_ALT[nonterm] - 1))
@@ -35,41 +23,48 @@ def step1(nonterm):
 
     print(L2)
 
-def step2(term):
-    print('step2')
+def step2():
+    print('step 2')
 
+    term = L2.pop()
     global cur_pointer
     L1.append(elemL1(1, term))
     cur_pointer += 1
 
+    print(L2)
+
 def step3():
-    print('step3')
+    print('step 3')
 
     global SOS
     SOS = 't'
 
 def step3a():
-    print('step3a')
+    print('step 3a')
 
     global SOS
     SOS = 'b'
+
+    print(L2)
 
 def step4():
-    print('step4')
+    print('step 4')
 
     global SOS
     SOS = 'b'
 
+    print(L2)
+
 def step5(term):
-    print('step5')
+    print('step 5')
 
     global cur_pointer
     L2.append(term)
     cur_pointer -= 1
-    print(L2)   # for debugging
+    print(L2)
 
 def step6a(nonterm):
-    print('step6a')
+    print('step 6a')
 
     global SOS
 
@@ -79,6 +74,10 @@ def step6a(nonterm):
     L1.append(elemL1(0, nonterm.symbol, alt, NUMBER_ALT[nonterm.symbol] - 1))
 
     # change data in L2
+    x = len(RULES[nonterm.symbol][nonterm.cur_alt])
+    for i in range (0, x):
+        L2.pop()
+
     tmp = RULES[nonterm.symbol][alt]
     tmp = list(tmp)
     tmp.reverse()
@@ -89,14 +88,15 @@ def step6a(nonterm):
     SOS = 'q'
 
 def step6b():
-    print('step6b')
+    print('step 6b')
 
     print ("ERROR: output for the chain is not")
 
 def step6c(nonterm):
-    print('step6c')
+    print('step 6c')
 
-    if RULES[L1[L1.__len__() - 1].symbol][L1[L1.__len__() - 1].cur_alt] == L2[L2.__len__() - 1]:  # for pop element in L1
+    x = len(RULES[nonterm.symbol][nonterm.cur_alt])
+    for i in range (0, x):
         L2.pop()
 
     L2.append(nonterm.symbol)
@@ -104,11 +104,13 @@ def step6c(nonterm):
 
 def point2():
     if SOS == 'q':
-        data_from_L2 = L2.pop()  # data_from_L2 is terminal or nonterminal
+        data_from_L2 = L2[L2.__len__() - 1]
+        # data_from_L2 = L2.pop()  # data_from_L2 is terminal or nonterminal
         if data_from_L2 in TERM:    # if data_from_L2 is terminal
             global cur_pointer
             if data_from_L2 == STR[cur_pointer]:
-                step2(data_from_L2)
+                step2()
+                # step2(data_from_L2)
                 if cur_pointer == STR.__len__():
                     if L2:
                         step3a()
@@ -119,7 +121,7 @@ def point2():
                         point2()
                         return
                 else:
-                    if L2:
+                    if not L2:
                         step3a()
                         point2()
                         return
@@ -131,7 +133,8 @@ def point2():
                 point2()
                 return
         else:   # if data_from_L2 is nonterminal
-            step1(data_from_L2)
+            step1()
+            # step1(data_from_L2)
             point2()
             return
 
@@ -143,8 +146,8 @@ def point2():
             return
         else:
             if data_from_L1.cur_alt < data_from_L1.count_alt:
-                if RULES[data_from_L1.symbol][data_from_L1.cur_alt] == L2[L2.__len__() - 1]:    # for pop element in L1
-                    L2.pop()
+                # if RULES[data_from_L1.symbol][data_from_L1.cur_alt] == L2[L2.__len__() - 1]:    # for pop element in L1
+                #     L2.pop()
                 step6a(data_from_L1)
                 point2()
                 return
@@ -159,8 +162,13 @@ def point2():
         pass
 
     if SOS == 't':
-        # some steps
-        pass
+        # print string of parse from L1
+        output = ''
+        for i in L1:
+            if i.flag == 0:
+                output += str(First_PLACE_in_RULES[i.symbol] + i.cur_alt) + ' '
+
+        print(output)
 
     else:
         print ("Fatal Error in step1()")
@@ -170,12 +178,13 @@ def main():
 
 if __name__ == '__main__':
 
-    # initialzation
+    # initialization
 
     RULES = {'B': ['T+B', 'T'], 'T': ['M', 'M*T'], 'M': ['a', 'b']}
     NUMBER_ALT = {'B': 2, 'T': 2, 'M': 2}
     TERM = {'!', '+', '*', 'a', 'b'}
     NONTERM = {'B', 'T', 'M'}
+    First_PLACE_in_RULES = {'B': 1, 'T': 3, 'M': 5}
 
     STR = 'a+b'
     S = 'B'
@@ -183,32 +192,7 @@ if __name__ == '__main__':
     L1 = []
     L2 = []
     L2.append(S)
-
     SOS = 'q'
-
     cur_pointer = 0
 
-    #str = "a+b"
-    #LR = "BBTTMMM"
-    #RR = [["T", "+", "B"], "T", "M", ["M", "*", "T"], "a", "b", ["(", "B", ")"]]
-    #m = 3  # number of non-terminals
-    #T = "!+*ab()"  # set of terminals
-
-    #B = infNet('B', 2, 1)
-    #C = infNet('C', 2, 3)
-    #M = infNet('M', 3, 5)
-
-    #N = [B, C, M]
-
-    #S = B  # initial character
-    #L1 = []
-    #L2 = []
-
-    # START
-
-    #L2.append(S)
-    #sos = 'q'  # 'q', 'b', 't'
-    #i = j = k = 0
     main()
-
-    # шаг 1 и шаг 2 сделаны
